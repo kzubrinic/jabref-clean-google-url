@@ -14,17 +14,17 @@ You can paste it in the JabRef's URL text field. After that, using this patch fu
 The patch is tested in last beta JabRef version 2.10.
 
 In this repository you can find patch file which you can apply on source code in repository (clean-google-url.patch) and in addition two java source files:
-* src/java/net/sf/jabref/FieldTextMenu.java (**changed**)
-* src/java/net/sf/jabref/util/GoogleUrlCleaner.java (**new**)
+* src/java/net/sf/jabref/FieldTextMenu.java ( **changed** )
+* src/java/net/sf/jabref/util/GoogleUrlCleaner.java ( **new** )
 
 
 ##Instalation:##
 
-1 Download JabRef source from http://sourceforge.net/p/jabref/code/ci/master/tree/
-2 Apply patch or manually put this files in repository
+1. Download JabRef source from http://sourceforge.net/p/jabref/code/ci/master/tree/
+2. Apply patch or manually put this files in repository
    * jabref/src/java/net/sf/jabref/FieldTextMenu.java
    * jabref/src/java/net/sf/jabref/util/GoogleUrlCleaner.java
-3 Build JabRef from changed source.
+3. Build JabRef from changed source.
 
 ##Usage:##
 
@@ -40,6 +40,6 @@ Right click on URL field and apply "Clean Google URL" functionality
 
 ![Image](images/p3.png?raw=true)
 
-URL from Google's search results is cleaned. If URL is not candidate for cleaning, text in URL field stay the same.
+URL from Google's search results is cleaned. If URL is not candidate for cleaning, text in URL field stays the same.
 
 ![Image](images/p4.png?raw=true)
