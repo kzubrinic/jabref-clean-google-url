@@ -1,0 +1,145 @@
+From 5309b2860cc5f48ae2a46971ac5c6fe5b305b746 Mon Sep 17 00:00:00 2001
+From: Krunoslav Zubrinic <kruno.zubrinic@gmail.com>
+Date: Mon, 1 Jul 2013 15:52:02 +0200
+Subject: [PATCH] Added functionality of cleaning URL's that Google search
+ returns, and which user paste to JabRef. This functionality is added using
+ text field context menu.
+
+	modified:   jabref/src/java/net/sf/jabref/FieldTextMenu.java
+	new file:   jabref/src/java/net/sf/jabref/util/GoogleUrlCleaner.java
+---
+ jabref/src/java/net/sf/jabref/FieldTextMenu.java   | 16 +++++
+ .../java/net/sf/jabref/util/GoogleUrlCleaner.java  | 81 ++++++++++++++++++++++
+ 2 files changed, 97 insertions(+)
+ create mode 100644 jabref/src/java/net/sf/jabref/util/GoogleUrlCleaner.java
+
+diff --git a/jabref/src/java/net/sf/jabref/FieldTextMenu.java b/jabref/src/java/net/sf/jabref/FieldTextMenu.java
+index 918948b..39ba285 100644
+--- a/jabref/src/java/net/sf/jabref/FieldTextMenu.java
++++ b/jabref/src/java/net/sf/jabref/FieldTextMenu.java
+@@ -48,6 +48,7 @@ import javax.swing.text.JTextComponent;
+ 
+ import net.sf.jabref.util.CaseChangeMenu;
+ import net.sf.jabref.util.NameListNormalizer;
++import net.sf.jabref.util.GoogleUrlCleaner;
+ 
+ public class FieldTextMenu implements MouseListener
+ {
+@@ -65,6 +66,8 @@ public class FieldTextMenu implements MouseListener
+     inputMenu.add( copyAct ) ;
+     inputMenu.addSeparator();
+     inputMenu.add(new ReplaceAction());
++    inputMenu.add(new UrlAction());
++
+     if (myFieldName.getTextComponent() instanceof JTextComponent)
+         inputMenu.add(new CaseChangeMenu((JTextComponent) myFieldName.getTextComponent()));
+   }
+@@ -219,5 +222,18 @@ public class FieldTextMenu implements MouseListener
+     }
+   }
+ 
++  class UrlAction extends BasicAction{
++    public UrlAction(){
++        super("Clean Google URL");
++        putValue(SHORT_DESCRIPTION, Globals.lang("If possible, clean URL that Google search returned"));
++    }
++    public void actionPerformed(ActionEvent evt){
++        if (myFieldName.getText().equals("")){
++            return;
++        }
++        String input = myFieldName.getText();
++        myFieldName.setText(GoogleUrlCleaner.cleanUrl(input));
++    }
++  }
+ 
+ }
+diff --git a/jabref/src/java/net/sf/jabref/util/GoogleUrlCleaner.java b/jabref/src/java/net/sf/jabref/util/GoogleUrlCleaner.java
+new file mode 100644
+index 0000000..d356348
+--- /dev/null
++++ b/jabref/src/java/net/sf/jabref/util/GoogleUrlCleaner.java
+@@ -0,0 +1,81 @@
++/*  Copyright (C) 2003-2013 JabRef contributors.
++    This program is free software; you can redistribute it and/or modify
++    it under the terms of the GNU General Public License as published by
++    the Free Software Foundation; either version 2 of the License, or
++    (at your option) any later version.
++
++    This program is distributed in the hope that it will be useful,
++    but WITHOUT ANY WARRANTY; without even the implied warranty of
++    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++    GNU General Public License for more details.
++
++    You should have received a copy of the GNU General Public License along
++    with this program; if not, write to the Free Software Foundation, Inc.,
++    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
++*/
++package net.sf.jabref.util;
++
++import java.io.UnsupportedEncodingException;
++import java.net.MalformedURLException;
++import java.net.URL;
++import java.net.URLDecoder;
++
++/**
++ * Class containing method(s) for cleaning URL returned by Google search.
++ * E.g. If you search for the "The String-to-String Correction Problem", Google
++ * will return a list of web pages associated with that text. If you copy any 
++ * link that search returned, you will have access to the link "enriched"
++ * with many meta data. 
++ * E.g. instead link http://dl.acm.org/citation.cfm?id=321811
++ * in your clipboard you will have this link:
++ *  https://www.google.hr/url?sa=t&rct=j&q=&esrc=s&source=web&cd=1&cad=rja&ved=0CC8QFjAA&url=http%3A%2F%2Fdl.acm.org%2Fcitation.cfm%3Fid%3D321811&ei=L2_RUcj6HsfEswa7joGwBw&usg=AFQjCNEBJPUimu-bAns6lSLe-kszz4AiGA&sig2=tj9c5x62ioFHkQTKfwkj0g&bvm=bv.48572450,d.Yms
++ *
++ * Using methods of this class, "dirty" link will be cleaned.
++ *
++ * Created by Krunoslav Zubrinic, July 2013.
++ */
++public class GoogleUrlCleaner {
++
++/*
++    public static void main(String[] args) {
++        System.out.println(cleanUrl("https://www.google.hr/url?sa=t&rct=j&q=&esrc=s&source=web&cd=1&cad=rja&ved=0CC0QFjAA&url=http%3A%2F%2Fdl.acm.org%2Fcitation.cfm%3Fid%3D321811&ei=gHDRUa-IKobotQbMy4GAAg&usg=AFQjCNEBJPUimu-bAns6lSLe-kszz4AiGA&sig2=DotF0pIZD8OhjDcSHPlBbQ"));
++        System.out.println(cleanUrl("http://dl.acm.org/citation.cfm?id=321811"));
++        System.out.println(cleanUrl("test text"));
++        System.out.println(cleanUrl(" "));
++        System.out.println(cleanUrl(""));
++        System.out.println(cleanUrl(null));
++   }
++*/
++
++    // clean Google URL
++    public static String cleanUrl(String dirty) {
++        if (dirty==null || dirty.length()==0)
++            return dirty;
++        try{
++            URL u = new URL(dirty);
++            // read URL parameters
++            String query = u.getQuery();
++            // if there is no parameters
++            if (query==null)
++                return dirty;
++            // split parameters
++            String[] pairs = query.split("&");
++            if (pairs==null)
++                return dirty;
++            for (String pair : pairs) {
++                int idx = pair.indexOf("=");
++                // "clean" url is decoded value of "url" parameter
++                if (pair.substring(0, idx).equals("url"))
++                    return URLDecoder.decode(pair.substring(idx + 1), "UTF-8");
++            }
++        }
++        catch(MalformedURLException e){
++            return dirty;
++        }
++        catch(UnsupportedEncodingException e){
++            return dirty;
++        }
++        return dirty;
++    }
++
++}
+-- 
+1.8.1.msysgit.1
+
