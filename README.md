@@ -11,7 +11,7 @@ E.g. Google's Copy link address function return this link: https://www.google.co
 
 You can paste it in the JabRef's URL text field. After that, using this patch functionality this URL is cleaned and transformed in real URL: http://dspace.ou.nl/bitstream/1820/1680/4/Towards-a-learning-path-specification.pdf
 
-The patch is tested in last beta JabRef version 2.10.
+The patch is tested in last beta JabRef version 2.10. 
 
 In this repository you can find patch file which you can apply on source code in repository (clean-google-url.patch) and in addition two java source files:
 * src/java/net/sf/jabref/FieldTextMenu.java ( **changed** )
