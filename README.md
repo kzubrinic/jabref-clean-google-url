@@ -18,7 +18,8 @@ In this repository you can find patch file which you can apply on source code in
 * src/java/net/sf/jabref/util/GoogleUrlCleaner.java ( **new** )
 
 
-##Instalation:##
+Instalation
+------------
 
 1. Download JabRef source from http://sourceforge.net/p/jabref/code/ci/master/tree/
 2. Apply patch or manually put this files in repository
@@ -26,7 +27,8 @@ In this repository you can find patch file which you can apply on source code in
    * jabref/src/java/net/sf/jabref/util/GoogleUrlCleaner.java
 3. Build JabRef from changed source.
 
-##Usage:##
+Usage
+-----
 
 Find URL using Google and copy URL 
 	
